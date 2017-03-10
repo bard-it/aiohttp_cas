@@ -64,83 +64,56 @@ def process_attributes(cas_response):
 
 async def _validate_1(ticket, service, root_url, **kwargs):
     """Validates for CASv1"""
-    validation_url = cas_url(
-            'validate',
-            root_url,
-            service=service,
-            ticket=ticket,
-            **kwargs
-            )
     log.info("Validating ticket ID {} with CASv1 against {}"
              .format(ticket, root_url))
-    async with ClientSession() as session:
-        async with session.get(validation_url) as resp:
-            text = await resp.text()
-            # "Parse" the response
-            (valid, user) = text.splitlines()
-            if valid == 'yes':
-                return {'user': user}
-            else:
-                return False
+    text = await resp.text()
+    # "Parse" the response
+    (valid, user) = text.splitlines()
+    if valid == 'yes':
+        return {'user': user}
+    else:
+        return False
 
 
 async def _validate_2(ticket, service, root_url, **kwargs):
-    """Validates for CASv2"""
-    validation_url = cas_url(
-            'validate',
-            root_url,
-            service=service,
-            ticket=ticket,
-            **kwargs
-            )
     log.info("Validating ticket ID {} with CASv2 against {}"
              .format(ticket, root_url))
-    async with ClientSession() as session:
-        async with session.get(validation_url) as resp:
-            nsmap = {'cas': 'http://www.yale.edu/tp/cas'}
-            text = await resp.text()
-            tree = etree.fromstring(text)
-            failure = tree.find('cas:authenticationFailure', nsmap)
-            if failure is not None:
-                # Authentication failed!
-                return False
-            success = tree.find('cas:authenticationSuccess', nsmap)
-            if success is not None:
-                attrs = {'user': tree.find('*/cas:user', nsmap).text}
-                return attrs
-            else:
-                # Neither success nor failure?
-                raise InvalidCasResponse('Neither success nor failure on login!', resp)
+    nsmap = {'cas': 'http://www.yale.edu/tp/cas'}
+    text = await resp.text()
+    tree = etree.fromstring(text)
+    failure = tree.find('cas:authenticationFailure', nsmap)
+    if failure is not None:
+        # Authentication failed!
+        return False
+    success = tree.find('cas:authenticationSuccess', nsmap)
+    if success is not None:
+        attrs = {'user': tree.find('*/cas:user', nsmap).text}
+        return attrs
+    else:
+        # Neither success nor failure?
+        raise InvalidCasResponse('Neither success nor failure on login!', resp)
 
 
-async def _validate_3(ticket, service, root_url, **kwargs):
+async def _validate_3(resp):
     """Validates for CASv3"""
-    validation_url = cas_url(
-            'serviceValidate',
-            root_url,
-            service=service,
-            ticket=ticket,
-            **kwargs)
     log.info("Validating ticket ID {} with CASv3 against {}"
              .format(ticket, root_url))
-    async with ClientSession() as session:
-        async with session.get(validation_url) as resp:
-            nsmap = {'cas': 'http://www.yale.edu/tp/cas'}
-            text = await resp.text()
-            tree = etree.fromstring(text)
-            failure = tree.find('cas:authenticationFailure', nsmap)
-            if failure is not None:
-                # Authentication failed!
-                return False
-            success = tree.find('cas:authenticationSuccess', nsmap)
-            if success is not None:
-                attrs = process_attributes(tree)
-                user = tree.find('*/cas:user', nsmap)
-                attrs['user'] = user.text
-                return attrs
-            else:
-                # Neither success nor failure?
-                raise InvalidCasResponse("Neither success nor failure on login!", resp)
+    nsmap = {'cas': 'http://www.yale.edu/tp/cas'}
+    text = await resp.text()
+    tree = etree.fromstring(text)
+    failure = tree.find('cas:authenticationFailure', nsmap)
+    if failure is not None:
+        # Authentication failed!
+        return False
+    success = tree.find('cas:authenticationSuccess', nsmap)
+    if success is not None:
+        attrs = process_attributes(tree)
+        user = tree.find('*/cas:user', nsmap)
+        attrs['user'] = user.text
+        return attrs
+    else:
+        # Neither success nor failure?
+        raise InvalidCasResponse("Neither success nor failure on login!", resp)
 
 
 async def validate(ticket, service, root_url, version, **kwargs):
@@ -156,10 +129,26 @@ async def validate(ticket, service, root_url, version, **kwargs):
     if not isinstance(version, str):
         raise TypeError("CAS version must be passed as a string, not {}"
                         .format(type(version)))
-    _validate = {'1': _validate_1,
-                 '2': _validate_2,
-                 '3': _validate_3}.get(version)
 
-    if _validate is None:
+    if version == '1': 
+        kind = 'validate'
+        _validate = _validate_1
+    elif version == '2':
+        kind = 'validate'
+        _validate = _validate_2
+    elif version == '3':
+        kind = 'serviceValidate'
+        _validate = _validate_3
+    else:
         raise ValueError("Unsupported CAS version {}".format(version))
-    return await _validate(ticket, service, root_url, **kwargs)
+    
+    validation_url = cas_url(
+            kind,
+            root_url,
+            service=service,
+            ticket=ticket,
+            **kwargs
+            )
+    async with ClientSession() as session:
+        async with session.get(validation_url) as resp:
+            return await _validate(resp)
