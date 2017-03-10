@@ -62,10 +62,8 @@ def process_attributes(cas_response):
     return out
 
 
-async def _validate_1(ticket, service, root_url, **kwargs):
+async def _validate_1(resp):
     """Validates for CASv1"""
-    log.info("Validating ticket ID {} with CASv1 against {}"
-             .format(ticket, root_url))
     text = await resp.text()
     # "Parse" the response
     (valid, user) = text.splitlines()
@@ -75,9 +73,7 @@ async def _validate_1(ticket, service, root_url, **kwargs):
         return False
 
 
-async def _validate_2(ticket, service, root_url, **kwargs):
-    log.info("Validating ticket ID {} with CASv2 against {}"
-             .format(ticket, root_url))
+async def _validate_2(resp):
     nsmap = {'cas': 'http://www.yale.edu/tp/cas'}
     text = await resp.text()
     tree = etree.fromstring(text)
@@ -96,8 +92,6 @@ async def _validate_2(ticket, service, root_url, **kwargs):
 
 async def _validate_3(resp):
     """Validates for CASv3"""
-    log.info("Validating ticket ID {} with CASv3 against {}"
-             .format(ticket, root_url))
     nsmap = {'cas': 'http://www.yale.edu/tp/cas'}
     text = await resp.text()
     tree = etree.fromstring(text)
@@ -129,8 +123,8 @@ async def validate(ticket, service, root_url, version, **kwargs):
     if not isinstance(version, str):
         raise TypeError("CAS version must be passed as a string, not {}"
                         .format(type(version)))
-
-    if version == '1': 
+    log.info("Validating ticket {}".format(ticket))
+    if version == '1':
         kind = 'validate'
         _validate = _validate_1
     elif version == '2':
@@ -141,7 +135,7 @@ async def validate(ticket, service, root_url, version, **kwargs):
         _validate = _validate_3
     else:
         raise ValueError("Unsupported CAS version {}".format(version))
-    
+
     validation_url = cas_url(
             kind,
             root_url,
