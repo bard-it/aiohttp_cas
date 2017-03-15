@@ -22,8 +22,13 @@ def setup(app, host, version,
     :param on_success: Default route for redirect after a successful login
     :param on_logout: Route for redirect after logout
     """
+
+    # Add a closing /, if necessary
+    if not host_prefix.endswith('/'):
+        host_prefix += '/'
+
     cas_root_url = parse.urlunsplit((
-        host_scheme, host, host_prefix + '/',
+        host_scheme, host, host_prefix,
         None, None
         ))
     app[APP_KEY] = {

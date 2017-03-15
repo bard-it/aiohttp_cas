@@ -74,6 +74,7 @@ async def _validate_1(resp):
 
 
 async def _validate_2(resp):
+    """Validates for CASv2"""
     nsmap = {'cas': 'http://www.yale.edu/tp/cas'}
     text = await resp.text()
     tree = etree.fromstring(text)

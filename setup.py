@@ -12,7 +12,7 @@ setup(name='aiohttp_cas',
                   ],
        author='G. Ryan Sablosky',
        author_email='gsablosky@bard.edu',
-       url='TBD',
+       url='https://github.com/bard-it/aiohttp_cas/',
        license='MIT',
        packages=['aiohttp_cas'],
        install_requires=[
