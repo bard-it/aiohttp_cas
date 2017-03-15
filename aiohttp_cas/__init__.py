@@ -11,16 +11,17 @@ def setup(app, host, version,
           host_prefix='', host_scheme='https',
           login_route='/login', logout_route='/logout',
           on_success='/', on_logout='/'):
-    """Sets up the app.
+    """Sets up CAS authentication for the app.
 
-    :param host str: CAS host to authenticate against
-    :param version str: Version of CAS to use
-    :param host_prefix: Server prefix that CAS runs under
-    :param host_scheme: Scheme to access the CAS host under
-    :param login_route: Route for local login handler
-    :param logout_route: Route for local logout handler
-    :param on_success: Default route for redirect after a successful login
-    :param on_logout: Route for redirect after logout
+    :param app: aiohttp app.
+    :param str host: CAS host to authenticate against
+    :param str version: Version of CAS to use
+    :param str host_prefix: Server prefix that CAS runs under
+    :param str host_scheme: Scheme to access the CAS host under
+    :param str login_route: Route for local login handler
+    :param str logout_route: Route for local logout handler
+    :param str on_success: Default route for redirect after a successful login
+    :param str on_logout: Route for redirect after logout
     """
 
     # Add a closing /, if necessary
