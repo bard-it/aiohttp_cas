@@ -1,6 +1,6 @@
 # aiohttp_cas
 CAS authentication support for aiohttp. Work in progress. Will probably eat your dog and then authenticate it into your payroll system.
-
+[docs](https://aiohttp-cas.readthedocs.io/en/latest/)
 ## Installation
 Not in PyPI yet. Download all this stuff then do
 ```python setup.py install```
