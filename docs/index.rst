@@ -10,9 +10,10 @@ aiohttp-cas adds support for the Central Authentication Service protocol to your
 aiohttp.web thingamabob.
 
 Example usage
------
+-------------
 
 .. code-block:: python
+
    from aiohttp import web
    from aiohttp_session import setup as session_setup
    from aiohttp_cas import login_required
@@ -35,10 +36,13 @@ Example usage
    
    web.run_app(make_app())
 
+Functions
+---------
+.. automodule:: aiohttp_cas
+    :members: setup, login_required
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: aiohttp_cas
-    :members: setup, login_required
+
