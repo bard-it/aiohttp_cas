@@ -12,7 +12,7 @@ aiohttp.web thingamabob.
 Example usage
 -----
 
-.. codeblock:: python
+.. code-block:: python
    from aiohttp import web
    from aiohttp_session import setup as session_setup
    from aiohttp_cas import login_required
@@ -34,6 +34,7 @@ Example usage
        return app
    
    web.run_app(make_app())
+
 
 .. toctree::
    :maxdepth: 2
