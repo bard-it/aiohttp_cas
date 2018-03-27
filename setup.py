@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='aiohttp_cas',
-      version='0.1',
+      version='0.2.0',
       description="CAS 1/2/3 authentication middleware for aiohttp.web",
       classifiers=['License :: OSI Approved :: MIT License',
                    'Intended Audience :: Developers',
