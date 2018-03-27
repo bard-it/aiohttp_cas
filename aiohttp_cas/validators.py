@@ -99,6 +99,7 @@ async def _validate_3(resp):
     failure = tree.find('cas:authenticationFailure', nsmap)
     if failure is not None:
         # Authentication failed!
+        log.info('Authentication failure: {}'.format(failure.text))
         return False
     success = tree.find('cas:authenticationSuccess', nsmap)
     if success is not None:
