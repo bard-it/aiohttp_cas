@@ -1,6 +1,7 @@
 from urllib import parse
 import functools
 
+from aiohttp.web import HTTPForbidden
 from aiohttp_session import get_session
 
 from .handlers import login_handler, logout_handler
@@ -65,3 +66,36 @@ def login_required(func, *args, **kwargs):
         else:
             return await func(request)
     return wrapped
+
+def filter_attrs(filter_fn, *args, **kwargs):
+    """Decorator for handler functions.
+
+    Applied to a request handler, it will apply the filter_fn to the attributes.
+    If filter_fn(attrs) returns true, the request will succeed; if not, it raises a
+    HTTPForbidden error.
+
+    I think this will only work after at least one @login_required.
+
+    Example:
+
+    @login_required
+    @filter_attrs(lambda x: x['employeeType'] != 'staff')
+    async def handler(request):
+        return "Hello there!"
+
+    :param func: function to wrap
+    :param filter_fn: function to evaluate the attributes with
+    """
+    def actual_decorator(func):
+        @functools.wraps(func)
+        async def wrapped(request):
+            session = await get_session(request)
+            stored_attrs = session.get(SESSION_KEY)
+            if (not stored_attrs):
+                raise HTTPForbidden
+            elif filter_fn(stored_attrs):
+                return await func(request)
+            else:
+                raise HTTPForbidden
+        return wrapped
+    return actual_decorator
