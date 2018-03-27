@@ -17,7 +17,7 @@ async def login_handler(request):
     ticket = request.GET.get('ticket')
 
     session = await get_session(request)
-    redir = session[SESSION_KEY].get('redir')
+    redir = session.get(SESSION_KEY, {}).get('redir', None)
     login_route = request.app[APP_KEY]['LOGIN_ROUTE']
     root_url = request.app[APP_KEY]['ROOT_URL']
     on_success = request.app[APP_KEY]['ON_SUCCESS']
