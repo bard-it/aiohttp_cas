@@ -129,10 +129,10 @@ async def validate(ticket, service, root_url, version, **kwargs):
         kind = 'validate'
         _validate = _validate_1
     elif version == '2':
-        kind = 'validate'
+        kind = 'serviceValidate'
         _validate = _validate_2
     elif version == '3':
-        kind = 'serviceValidate'
+        kind = 'p3/serviceValidate'
         _validate = _validate_3
     else:
         raise ValueError("Unsupported CAS version {}".format(version))
