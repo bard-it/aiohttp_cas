@@ -14,7 +14,7 @@ async def login_handler(request):
     We get the ticket ID from the user, the rest comes from info stored on
     the session.
     """
-    ticket = request.GET.get('ticket')
+    ticket = request.query.get('ticket')
 
     session = await get_session(request)
     redir = session.get(SESSION_KEY, {}).get('redir', None)
