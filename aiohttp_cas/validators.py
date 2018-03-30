@@ -95,7 +95,10 @@ async def _validate_3(resp):
     """Validates for CASv3"""
     nsmap = {'cas': 'http://www.yale.edu/tp/cas'}
     text = await resp.text()
-    tree = etree.fromstring(text)
+    try:
+        tree = etree.fromstring(text)
+    except:
+        raise InvalidCasResponse("Received invalid XML in response!", resp)
     failure = tree.find('cas:authenticationFailure', nsmap)
     if failure is not None:
         # Authentication failed!
@@ -122,6 +125,7 @@ async def validate(ticket, service, root_url, version, **kwargs):
     :param \*kwargs: Additional parameters passed to the validate function.
                      (which, in turn, is passed to the CAS url builder)
     """
+    log.info("Attempting to validate ticket...")
     if not isinstance(version, str):
         raise TypeError("CAS version must be passed as a string, not {}"
                         .format(type(version)))
@@ -145,6 +149,7 @@ async def validate(ticket, service, root_url, version, **kwargs):
             ticket=ticket,
             **kwargs
             )
+    log.info("Requesting validation URL {}".format(validation_url))
     async with ClientSession() as session:
         async with session.get(validation_url) as resp:
             return await _validate(resp)
