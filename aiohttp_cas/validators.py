@@ -73,26 +73,8 @@ async def _validate_1(resp):
         return False
 
 
-async def _validate_2(resp):
-    """Validates for CASv2"""
-    nsmap = {'cas': 'http://www.yale.edu/tp/cas'}
-    text = await resp.text()
-    tree = etree.fromstring(text)
-    failure = tree.find('cas:authenticationFailure', nsmap)
-    if failure is not None:
-        # Authentication failed!
-        return False
-    success = tree.find('cas:authenticationSuccess', nsmap)
-    if success is not None:
-        attrs = {'user': tree.find('*/cas:user', nsmap).text}
-        return attrs
-    else:
-        # Neither success nor failure?
-        raise InvalidCasResponse('Neither success nor failure on login!', resp)
-
-
-async def _validate_3(resp):
-    """Validates for CASv3"""
+async def _validate_23(resp):
+    """Validates for CASv2 and CASv3"""
     nsmap = {'cas': 'http://www.yale.edu/tp/cas'}
     text = await resp.text()
     try:
@@ -135,10 +117,10 @@ async def validate(ticket, service, root_url, version, **kwargs):
         _validate = _validate_1
     elif version == '2':
         kind = 'serviceValidate'
-        _validate = _validate_2
+        _validate = _validate_23
     elif version == '3':
         kind = 'p3/serviceValidate'
-        _validate = _validate_3
+        _validate = _validate_23
     else:
         raise ValueError("Unsupported CAS version {}".format(version))
 
